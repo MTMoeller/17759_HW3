@@ -97,7 +97,7 @@ def test( model, device, test_loader, epsilon ):
             # !! Put your code below
 
             # Send the perturbed image in the last iteration to model to get output
-            perturbed_output = (model(perturbed_image))
+            output = (model(perturbed_image))
             # Calculate the loss given the new output and the target
             loss = F.nll_loss(output, target)
             # Zero all existing gradients
