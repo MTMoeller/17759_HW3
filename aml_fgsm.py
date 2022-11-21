@@ -54,13 +54,13 @@ model.eval()
 def fgsm_attack(image, epsilon, data_grad):
     # !! Put your code below
     # Collect the element-wise sign of the data gradient, you can use data_grad.sign()
-
+    attack = image +epsilon*data_grad.sign()
     # Create the perturbed image by adjusting each pixel of the input image
-
+    pert_image = torch.clamp(attack, 0, 1)
     # Adding clipping to maintain [0,1] range, you can use function torch.clamp
 
     # Return the perturbed image
-    
+    return pert_image
     # !! Put your code above
 
 def test( model, device, test_loader, epsilon ):
