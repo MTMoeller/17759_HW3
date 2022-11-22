@@ -120,6 +120,7 @@ def ea_attack(N, image, target_class, epsilon, rho_min, beta_min, num_iter, mode
         # Update the value of beta as max(beta_min,0.4*0.9^num_plateaus)
         beta = max(beta_min,0.4*0.9^num_plateaus)
         # !! Put your code above
+        print("Here")
     print(perturbed_image.shape)
     perturbed_image = nextPopulation
     # Return the perturbed image
@@ -163,9 +164,9 @@ def test( model, device, test_loader, epsilon ):
         perturbed_image.data = image.detach() + delta.detach()
 
         target_class = (target.item() + 1) % 10
-
+        print("nhere")
         perturbed_image = ea_attack(10, image, target_class, epsilon, 0.1, 0.15, num_iter, model, device)
-
+        print("now here")
         # Re-classify the perturbed image
         perturbed_output = model(perturbed_image)
 
