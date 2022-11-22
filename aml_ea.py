@@ -63,59 +63,64 @@ def ea_attack(N, image, target_class, epsilon, rho_min, beta_min, num_iter, mode
 
     # initialize the population with random images in the feasible region
     # if you are familiar with pytorch and tensor operation, you can create a tensor for the population like the following
-    # population = torch.empty([N] + dims, device=device).uniform_(-epsilon, epsilon)
-    # population = torch.clamp(population + image, 0, 1) - image
+    population = torch.empty([N] + dims, device=device).uniform_(-epsilon, epsilon)
+    population = torch.clamp(population + image, 0, 1) - image
     # if you prefer to use a list, you may consider the following
-    # population = []
-    # for n in range(N):
-    #     rand_image = torch.empty(dims, device=device).uniform_(-epsilon, epsilon)
-    #     rand_image = torch.clamp(rand_image + image, 0, 1) - image
-    #     population.append(rand_image)
+    #population = []
+    #for n in range(N):
+    #    rand_image = torch.empty(dims, device=device).uniform_(-epsilon, epsilon)
+    #    rand_image = torch.clamp(rand_image + image, 0, 1) - image
+    #    population.append(rand_image)
 
     # initialize two parameters rho=0.5 and beta=0.4
-
+    rho = 0.5
+    beta = 0.4
     # initialize num_plateaus to be 0
-
+    num_plateaus = 0
+    num_iter =1
+    previous_elite_score = -1000
     for i in range(num_iter):
-
         # For each member in the current population, compute the fitness score. Note that you will need to clamp the
         # value to a large range, e.g., [-1000,1000] to avoid getting "inf"
-
+        fitness_score = torch.clamp(torch.log(population)-torch.log(sum(population)), -1000, 1000)
         # Find the elite member, which is the one with the highest fitness score
-
+        elite_member = torch.max(fitness_score)
         # Add the elite member to the new population
-
+        population = population + elite_member
         # If the elite member can succeed in attack, terminate and return the elite member
-
+        if torch.argmax(elite_member) != target_class:
+            return elite_member
         # If the elite member’s fitness score is no better than the last population’s elite member’s fitness score,
         # increment num_plateaus. It is recommended to use a threshold of 1e-5 to avoid numerical instability
-
-
+        if elite_member - previous_elite_score <= 1e-5:
+            num_plateaus += 1
+        previous_elite_score = elite_member
         # Compute the probability each member in the population should be chosen by applying softmax to the fitness
         # scores
-
+        probs = torch.softmax(fitness_score, dim = 0)
         # Choose a member in the current population according to the probability, name it parent_1
-
+        parent_1 = torch.sample(population)
         # Choose a member in the current population according to the probability, name it parent_2
-
+        parent_2 = torch.sample(population)
         # Generate a “child” image from parent1 and parent2: For each pixel, take parent1’s corresponding pixel
         # value with probability p=fitness(parent1)/(fitness(parent1)+fitness(parent2))
         # and take parent2’s corresponding pixel value with probability 1-p
-
+        child = torch.gather(torch.stack((parent_1, parent_2)), 0, probs)
         # With probability q, add a random noise to the children image with pixel-wise value uniformly sampled from
         # [-beta*epsilon,beta*epsilon]
-
+        noise = torch.empty(1, parent_1.shape[0]).uniform_(-beta*epsilon, beta*epsilon).to(device)
         # Apply clipping on the child image to make sure it is in the feasible region F
-
+        child = torch.clamp(noise+image, 0, 1)
 	# Add this child to the population, repeat generating children in this way until the population has N members
-
-
+        nextPopulation = torch.empty((population.shape[0], population.shape[1]))
+        for children in range(N):
+            nextPopulation[children] = child
         # Update the value of rho as max(rho_min,0.5*0.9^num_plateaus)
-
+        rho = max(rho_min, 0.5*0.9**num_plateaus)
         # Update the value of beta as max(beta_min,0.4*0.9^num_plateaus)
-
+        beta = max(beta_min,0.4*0.9^num_plateaus)
         # !! Put your code above
-
+    perturbed_image = nextPopulation
     # Return the perturbed image
     return perturbed_image
 
