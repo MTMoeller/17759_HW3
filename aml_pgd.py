@@ -112,12 +112,11 @@ def test( model, device, test_loader, epsilon ):
             delta = torch.clamp(delta, -epsilon, epsilon)
             # Adjust delta to make sure the perturbed image is in the range [0,1] You can apply torch clamp to
             # delta+image, and then update delta as the difference between the clamped image and the original image
-            delta = torch.clamp(delta+image, 0, 1)
+            delta = torch.clamp(delta-image, 0, 1)
             # update perturbed_image
             perturbed_image.data = perturbed_image.detach() + alpha*delta.detach()
             # Reset gradient of perturbed_image to zero, you can use x.grad.zero_()
             perturbed_image.grad.zero_()
-
             # !! Put your code above
 
         # Re-classify the perturbed image
