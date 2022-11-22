@@ -100,9 +100,9 @@ def ea_attack(N, image, target_class, epsilon, rho_min, beta_min, num_iter, mode
         # scores
         probs = torch.softmax(fitness_score, dim = 0)
         # Choose a member in the current population according to the probability, name it parent_1
-        parent_1 = torch.sample(population)
+        #parent_1 = torch.sample(population)
         # Choose a member in the current population according to the probability, name it parent_2
-        parent_2 = torch.sample(population)
+        #parent_2 = torch.sample(population)
         # Generate a “child” image from parent1 and parent2: For each pixel, take parent1’s corresponding pixel
         # value with probability p=fitness(parent1)/(fitness(parent1)+fitness(parent2))
         # and take parent2’s corresponding pixel value with probability 1-p
