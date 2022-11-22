@@ -82,6 +82,7 @@ def ea_attack(N, image, target_class, epsilon, rho_min, beta_min, num_iter, mode
     for i in range(num_iter):
         # For each member in the current population, compute the fitness score. Note that you will need to clamp the
         # value to a large range, e.g., [-1000,1000] to avoid getting "inf"
+        print("nhere")
         fitness_score = torch.clamp(torch.log(population)-torch.log(sum(population)), -1000, 1000)
         # Find the elite member, which is the one with the highest fitness score
         elite_member = torch.max(fitness_score)
@@ -105,6 +106,7 @@ def ea_attack(N, image, target_class, epsilon, rho_min, beta_min, num_iter, mode
         # Generate a “child” image from parent1 and parent2: For each pixel, take parent1’s corresponding pixel
         # value with probability p=fitness(parent1)/(fitness(parent1)+fitness(parent2))
         # and take parent2’s corresponding pixel value with probability 1-p
+        print("now here")
         child = torch.gather(torch.stack((parent_1, parent_2)), 0, probs)
         # With probability q, add a random noise to the children image with pixel-wise value uniformly sampled from
         # [-beta*epsilon,beta*epsilon]
@@ -113,6 +115,7 @@ def ea_attack(N, image, target_class, epsilon, rho_min, beta_min, num_iter, mode
         child = torch.clamp(noise+image, 0, 1)
 	# Add this child to the population, repeat generating children in this way until the population has N members
         nextPopulation = torch.empty((population.shape[0], population.shape[1]))
+        print("now now here")
         for children in range(N):
             nextPopulation[children] = child
         # Update the value of rho as max(rho_min,0.5*0.9^num_plateaus)
@@ -164,9 +167,9 @@ def test( model, device, test_loader, epsilon ):
         perturbed_image.data = image.detach() + delta.detach()
 
         target_class = (target.item() + 1) % 10
-        print("nhere")
+       
         perturbed_image = ea_attack(10, image, target_class, epsilon, 0.1, 0.15, num_iter, model, device)
-        print("now here")
+        
         # Re-classify the perturbed image
         perturbed_output = model(perturbed_image)
 
